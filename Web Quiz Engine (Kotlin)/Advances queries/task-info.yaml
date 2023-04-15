@@ -914,57 +914,9 @@ files:
 
   learner_created: true
 feedback_link: https://hyperskill.org/learn/step/24910#comment
-status: Failed
+status: Solved
 feedback:
-  message: |-
-    Wrong answer in test #190
-
-    The JSON object at key content has an incorrect length: should be equal to 1, found 10
-
-    Full JSON:
-    {
-      &quot;content&quot;: [
-        {
-          &quot;id&quot;: 7,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:54.250157&quot;
-        },
-        {
-          &quot;id&quot;: 5,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:54.16478&quot;
-        },
-        {
-          &quot;id&quot;: 5,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:54.042604&quot;
-        },
-        {
-          &quot;id&quot;: 5,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:53.962473&quot;
-        },
-        {
-          &quot;id&quot;: 5,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:53.885899&quot;
-        },
-        {
-          &quot;id&quot;: 5,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:53.801647&quot;
-        },
-        {
-          &quot;id&quot;: 6,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:52.587346&quot;
-        },
-        {
-          &quot;id&quot;: 6,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:38.82762&quot;
-        },
-        {
-          &quot;id&quot;: 5,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:37.434315&quot;
-        },
-        {
-          &quot;id&quot;: 2,
-          &quot;completedAt&quot;: &quot;2023-04-15T12:13:33.388192&quot;
-        }
-      ]
-    }
-  time: "Sat, 15 Apr 2023 09:13:56 UTC"
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: "Sat, 15 Apr 2023 09:34:18 UTC"
 record: 6

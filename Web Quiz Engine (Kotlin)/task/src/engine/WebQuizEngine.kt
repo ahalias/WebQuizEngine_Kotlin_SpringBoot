@@ -1,31 +1,23 @@
 package engine
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.EnableAspectJAutoProxy
 import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.stereotype.Controller
 import org.springframework.stereotype.Service
-import org.springframework.ui.Model
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.*
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.validation.Valid
 import org.springframework.data.domain.PageRequest
@@ -131,8 +123,8 @@ class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: Us
         val author = userRepo.findByEmail(authentication.name)
         if (author != quiz.author) throw Forbidden("You are not author") else {
         quizRepository.delete(quiz)
-        val completedQuiz = completedQuizzesRepository.findById(id).orElseThrow { QuizNotFound("Quiz not found") }
-        completedQuizzesRepository.delete(completedQuiz)
+            val completedQuizList = completedQuizzesRepository.findAllById(id)
+            completedQuizList.forEach { completedQuizzesRepository.delete(it) }
         val response = ConcurrentHashMap<String, Any>()
         response["status"] = "deleted"
         response["message"] = "Quiz successfully deleted"
@@ -164,8 +156,8 @@ class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: Us
     }
 
     @GetMapping("/api/quizzes/completed")
-    fun resolveCompletedQuizzes(authentication: Authentication): ResponseEntity<Map<String, Any>> {
-        val quizzes = completedQuizzesRepository.findBycompletedByOrderByCompletedAtDesc(authentication.name, PageRequest.of(0, 10))
+    fun resolveCompletedQuizzes(@RequestParam page: Int, authentication: Authentication): ResponseEntity<Map<String, Any>> {
+        val quizzes = completedQuizzesRepository.findBycompletedByOrderByCompletedAtDesc(authentication.name, PageRequest.of(page, 10))
         val response = ConcurrentHashMap<String, Any>()
         response["content"] = quizzes?.toList()?.sortedWith(compareBy { it.completedAt })?.reversed() ?: emptyList<Any>()
         return ResponseEntity.status(HttpStatus.OK).body(response)

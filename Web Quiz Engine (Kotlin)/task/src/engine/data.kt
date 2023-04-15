@@ -2,20 +2,14 @@ package engine
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.repository.PagingAndSortingRepository
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import javax.persistence.*
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.NotBlank
@@ -79,6 +73,9 @@ interface CompletedQuizzesRepository : JpaRepository<CompletedQuizzes, Long> {
     fun findBycompletedByOrderByCompletedAtDesc(completedBy: String, pageable: Pageable): List<CompletedQuizzes>?
 
     override fun findById(id: Long): Optional<CompletedQuizzes>
+
+    fun findAllById(id: Long): List<CompletedQuizzes>
+
 }
 
 @Repository
