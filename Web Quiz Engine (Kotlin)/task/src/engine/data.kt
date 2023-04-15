@@ -2,11 +2,9 @@ package engine
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 import java.util.*
@@ -70,7 +68,7 @@ open class CompletedQuizzes {
 @Repository
 interface CompletedQuizzesRepository : JpaRepository<CompletedQuizzes, Long> {
     fun findByCompletedBy(completedBy: String): List<CompletedQuizzes>?
-    fun findBycompletedByOrderByCompletedAtDesc(completedBy: String, pageable: Pageable): List<CompletedQuizzes>?
+    fun findBycompletedByOrderByCompletedAtDesc(completedBy: String, pageable: Pageable): Page<CompletedQuizzes>?
     override fun findById(id: Long): Optional<CompletedQuizzes>
     fun findAllById(id: Long): List<CompletedQuizzes>
 
@@ -86,34 +84,6 @@ interface UserRepository : JpaRepository<User, Long> {
 interface QuizRepository: JpaRepository<QuizBody, Long> {
     override fun findAll(): List<QuizBody>
     override fun findById(id: Long): Optional<QuizBody>
-}
-
-
-class UserDetailsImpl(user: User) : UserDetails {
-    private val username: String
-    private val password: String
-    private val rolesAndAuthorities: List<GrantedAuthority>
-
-    init {
-        username = user.email
-        password = user.password
-        rolesAndAuthorities = listOf<GrantedAuthority>(SimpleGrantedAuthority(user.role))
-    }
-
-    override fun getAuthorities() = rolesAndAuthorities
-
-    override fun getPassword() = password
-
-    override fun getUsername() = username
-
-    // 4 remaining methods that just return true
-    override fun isAccountNonExpired() = true
-
-    override fun isAccountNonLocked() = true
-
-    override fun isCredentialsNonExpired() = true
-
-    override fun isEnabled() = true
 }
 
 
