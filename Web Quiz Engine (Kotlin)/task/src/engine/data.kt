@@ -57,7 +57,7 @@ open class CompletedQuizzes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
-    var quiz_id: Long = 0
+    var quizId: Long = 0
     @JsonIgnore
     var completedBy: String = ""
     var id: Long = 0

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
-class WebSecurityConfigurerImpl(val userRepository: UserRepository) : WebSecurityConfigurerAdapter() {
+class WebSecurityConfigurerImpl(private val userRepository: UserRepository) : WebSecurityConfigurerAdapter() {
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http.authorizeRequests()
@@ -68,7 +68,7 @@ class UserDetailsImpl(user: User) : UserDetails {
 
 @Service
 class UserDetailsServiceImpl(
-    val userRepository: UserRepository
+    private val userRepository: UserRepository
 ) : UserDetailsService {
 
     @Throws(UsernameNotFoundException::class)
