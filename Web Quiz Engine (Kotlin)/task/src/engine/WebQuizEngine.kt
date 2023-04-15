@@ -71,7 +71,7 @@ class WebSecurityConfigurerImpl(val userRepository: UserRepository) : WebSecurit
 
 
 @RestController
-class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: UserRepository, val encoder: PasswordEncoder
+class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: UserRepository, val completedQuizzesRepository: CompletedQuizzesRepository, val encoder: PasswordEncoder
 ) {
 
     @PostMapping("/api/register")
@@ -131,6 +131,8 @@ class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: Us
         val author = userRepo.findByEmail(authentication.name)
         if (author != quiz.author) throw Forbidden("You are not author") else {
         quizRepository.delete(quiz)
+        val completedQuiz = completedQuizzesRepository.findById(id).orElseThrow { QuizNotFound("Quiz not found") }
+        completedQuizzesRepository.delete(completedQuiz)
         val response = ConcurrentHashMap<String, Any>()
         response["status"] = "deleted"
         response["message"] = "Quiz successfully deleted"
@@ -139,14 +141,35 @@ class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: Us
     }}
 
     @PostMapping("/api/quizzes/{id}/solve")
-    fun solveQuiz(@PathVariable id: Long, @RequestBody answer: Map<String, Array<Int>>): QuizResponse {
+    fun solveQuiz(@PathVariable id: Long, authentication: Authentication, @RequestBody answer: Map<String, Array<Int>>): QuizResponse {
         val rightAnswer = QuizResponse( true, "Congratulations, you're right!")
         val wrongAnswer= QuizResponse(false,"Wrong answer! Please, try again.")
         val quiz = quizRepository.findById(id).orElseThrow { QuizNotFound("Quiz not found") }
-            return if (quiz.answer.contentEquals(answer["answer"])) rightAnswer
+            return if (quiz.answer.contentEquals(answer["answer"])) {
+
+                completedQuizzesRepository.save(CompletedQuizzes().apply {
+                    this.completedBy = authentication.name
+                    this.id = quiz.id
+                })
+                rightAnswer
+
+            }
             else if (answer["answer"].isNullOrEmpty() && quiz.answer.isEmpty()) {
-                 rightAnswer
+                completedQuizzesRepository.save(CompletedQuizzes().apply {
+                    this.completedBy = authentication.name
+                    this.id = quiz.id
+                })
+                rightAnswer
             } else  QuizResponse(false,"Wrong answer! Please, try again.")
+    }
+
+    @GetMapping("/api/quizzes/completed")
+    fun resolveCompletedQuizzes(authentication: Authentication): ResponseEntity<Map<String, Any>> {
+        val quizzes = completedQuizzesRepository.findBycompletedByOrderByCompletedAtDesc(authentication.name, PageRequest.of(0, 10))
+        val response = ConcurrentHashMap<String, Any>()
+        response["content"] = quizzes?.toList()?.sortedWith(compareBy { it.completedAt })?.reversed() ?: emptyList<Any>()
+        return ResponseEntity.status(HttpStatus.OK).body(response)
+
     }
 
     @ResponseStatus(code = HttpStatus.NOT_FOUND)

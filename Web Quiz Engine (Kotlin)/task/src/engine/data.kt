@@ -12,6 +12,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.persistence.*
@@ -25,6 +27,7 @@ import javax.validation.constraints.Size
 @Table(name = "quizzes")
 open class QuizBody {
     @Id
+    @Column(name = "quizzes_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0
     @NotBlank
@@ -53,10 +56,29 @@ open class User {
     @Size(min=5)
     var password: String = ""
     var role: String = "USER"
+}
+
+
+@Entity
+@Table(name = "completed_quizzes")
+open class CompletedQuizzes {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name = "id")
-    var quizzes: QuizBody? = null
+    var quiz_id: Long = 0
+    @JsonIgnore
+    var completedBy: String = ""
+    var id: Long = 0
+    var completedAt: LocalDateTime = LocalDateTime.now()
+}
+
+
+@Repository
+interface CompletedQuizzesRepository : JpaRepository<CompletedQuizzes, Long> {
+    fun findByCompletedBy(completedBy: String): List<CompletedQuizzes>?
+    fun findBycompletedByOrderByCompletedAtDesc(completedBy: String, pageable: Pageable): List<CompletedQuizzes>?
+
+    override fun findById(id: Long): Optional<CompletedQuizzes>
 }
 
 @Repository
@@ -64,6 +86,12 @@ interface UserRepository : JpaRepository<User, Long> {
     fun findByEmail(email: String): User?
 }
 
+
+@Repository
+interface QuizRepository: JpaRepository<QuizBody, Long> {
+    override fun findAll(): List<QuizBody>
+    override fun findById(id: Long): Optional<QuizBody>
+}
 
 
 class UserDetailsImpl(user: User) : UserDetails {
@@ -92,13 +120,6 @@ class UserDetailsImpl(user: User) : UserDetails {
 
     override fun isEnabled() = true
 }
-
-@Repository
-interface QuizRepository: JpaRepository<QuizBody, Long> {
-    override fun findAll(): List<QuizBody>
-    override fun findById(id: Long): Optional<QuizBody>
-}
-
 
 
 data class QuizResponse(val success: Boolean,
