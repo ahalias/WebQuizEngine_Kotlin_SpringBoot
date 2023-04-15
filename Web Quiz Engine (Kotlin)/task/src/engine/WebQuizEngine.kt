@@ -12,7 +12,12 @@ import org.springframework.data.domain.PageRequest
 
 
 @RestController
-class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: UserRepository, val completedQuizzesRepository: CompletedQuizzesRepository, val encoder: PasswordEncoder
+class QuizQuestions(
+    private val quizRepository: QuizRepository,
+    val userRepo: UserRepository,
+    val completedQuizzesRepository: CompletedQuizzesRepository,
+    val encoder: PasswordEncoder,
+    val dbmanagement: DBManagement
 ) {
 
     @PostMapping("/api/register")
@@ -21,8 +26,7 @@ class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: Us
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(QuizResponse(false, "Failed to register user"))
         }
         try {
-            user.password = encoder.encode(user.password)
-            userRepo.save(user)
+            dbmanagement.saveUserToDb(user, encoder)
             return ResponseEntity.status(HttpStatus.OK).body(QuizResponse(true, "User registered successfully ${user.email}, ${user.password}"))
         } catch(e: Exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(QuizResponse(false, "Failed to register user: ${e.message}"))
@@ -73,10 +77,13 @@ class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: Us
     fun solveQuiz(@PathVariable id: Long, authentication: Authentication, @RequestBody answer: Map<String, Array<Int>>): QuizResponse {
         val quiz = quizRepository.findById(id).orElseThrow { QuizNotFound("Quiz not found") }
             return if (quiz.answer.contentEquals(answer["answer"])) {
-                addQuizToSaved(authentication, quiz, completedQuizzesRepository)
+                dbmanagement.addQuizToSaved(authentication, quiz)
+                return QuizResponse( true, "Congratulations, you're right!")
+
             }
             else if (answer["answer"].isNullOrEmpty() && quiz.answer.isEmpty()) {
-                addQuizToSaved(authentication, quiz, completedQuizzesRepository)
+                dbmanagement.addQuizToSaved(authentication, quiz)
+                return QuizResponse( true, "Congratulations, you're right!")
             } else  QuizResponse(false,"Wrong answer! Please, try again.")
     }
 
