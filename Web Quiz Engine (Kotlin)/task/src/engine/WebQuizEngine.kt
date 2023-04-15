@@ -134,25 +134,21 @@ class QuizQuestions(private val quizRepository: QuizRepository, val userRepo: Us
 
     @PostMapping("/api/quizzes/{id}/solve")
     fun solveQuiz(@PathVariable id: Long, authentication: Authentication, @RequestBody answer: Map<String, Array<Int>>): QuizResponse {
-        val rightAnswer = QuizResponse( true, "Congratulations, you're right!")
-        val wrongAnswer= QuizResponse(false,"Wrong answer! Please, try again.")
         val quiz = quizRepository.findById(id).orElseThrow { QuizNotFound("Quiz not found") }
             return if (quiz.answer.contentEquals(answer["answer"])) {
-
-                completedQuizzesRepository.save(CompletedQuizzes().apply {
-                    this.completedBy = authentication.name
-                    this.id = quiz.id
-                })
-                rightAnswer
-
+                addQuizToSaved(authentication, quiz)
             }
             else if (answer["answer"].isNullOrEmpty() && quiz.answer.isEmpty()) {
-                completedQuizzesRepository.save(CompletedQuizzes().apply {
-                    this.completedBy = authentication.name
-                    this.id = quiz.id
-                })
-                rightAnswer
+                addQuizToSaved(authentication, quiz)
             } else  QuizResponse(false,"Wrong answer! Please, try again.")
+    }
+
+    fun addQuizToSaved(authentication: Authentication, quiz: QuizBody): QuizResponse {
+        completedQuizzesRepository.save(CompletedQuizzes().apply {
+            this.completedBy = authentication.name
+            this.id = quiz.id
+        })
+        return QuizResponse( true, "Congratulations, you're right!")
     }
 
     @GetMapping("/api/quizzes/completed")

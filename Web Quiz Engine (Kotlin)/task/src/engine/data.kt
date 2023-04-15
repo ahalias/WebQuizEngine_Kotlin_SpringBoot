@@ -71,9 +71,7 @@ open class CompletedQuizzes {
 interface CompletedQuizzesRepository : JpaRepository<CompletedQuizzes, Long> {
     fun findByCompletedBy(completedBy: String): List<CompletedQuizzes>?
     fun findBycompletedByOrderByCompletedAtDesc(completedBy: String, pageable: Pageable): List<CompletedQuizzes>?
-
     override fun findById(id: Long): Optional<CompletedQuizzes>
-
     fun findAllById(id: Long): List<CompletedQuizzes>
 
 }
